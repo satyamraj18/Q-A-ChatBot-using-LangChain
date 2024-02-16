@@ -87,14 +87,13 @@ class SequenceTreeItem(ObjectTreeItem):
                 continue
             def setfunction(value, key=key, object=self.object):
                 object[key] = value
-            item = make_objecttreeitem(f"{key!r}:", value, setfunction)
+            item = make_objecttreeitem("%r:" % (key,), value, setfunction)
             sublist.append(item)
         return sublist
 
 class DictTreeItem(SequenceTreeItem):
     def keys(self):
-        # TODO return sorted(self.object)
-        keys = list(self.object)
+        keys = list(self.object.keys())
         try:
             keys.sort()
         except:
@@ -120,7 +119,7 @@ def make_objecttreeitem(labeltext, object, setfunction=None):
     return c(labeltext, object, setfunction)
 
 
-def _debug_object_browser(parent):  # htest #
+def _object_browser(parent):  # htest #
     import sys
     from tkinter import Toplevel
     top = Toplevel(parent)
@@ -135,10 +134,9 @@ def _debug_object_browser(parent):  # htest #
     node = TreeNode(sc.canvas, None, item)
     node.update()
 
-
 if __name__ == '__main__':
     from unittest import main
     main('idlelib.idle_test.test_debugobj', verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
-    run(_debug_object_browser)
+    run(_object_browser)

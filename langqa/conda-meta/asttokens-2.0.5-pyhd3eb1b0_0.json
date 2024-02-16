@@ -25,12 +25,12 @@
     "Lib/site-packages/asttokens/util.py",
     "Lib/site-packages/asttokens/version.py",
     ".nonadmin",
-    "Lib/site-packages/asttokens/__pycache__/__init__.cpython-311.pyc",
-    "Lib/site-packages/asttokens/__pycache__/asttokens.cpython-311.pyc",
-    "Lib/site-packages/asttokens/__pycache__/line_numbers.cpython-311.pyc",
-    "Lib/site-packages/asttokens/__pycache__/mark_tokens.cpython-311.pyc",
-    "Lib/site-packages/asttokens/__pycache__/util.cpython-311.pyc",
-    "Lib/site-packages/asttokens/__pycache__/version.cpython-311.pyc"
+    "Lib/site-packages/asttokens/__pycache__/__init__.cpython-39.pyc",
+    "Lib/site-packages/asttokens/__pycache__/asttokens.cpython-39.pyc",
+    "Lib/site-packages/asttokens/__pycache__/line_numbers.cpython-39.pyc",
+    "Lib/site-packages/asttokens/__pycache__/mark_tokens.cpython-39.pyc",
+    "Lib/site-packages/asttokens/__pycache__/util.cpython-39.pyc",
+    "Lib/site-packages/asttokens/__pycache__/version.cpython-39.pyc"
   ],
   "fn": "asttokens-2.0.5-pyhd3eb1b0_0.conda",
   "legacy_bz2_md5": "d9c6faf4f1a52c664ef1343f464e45b5",
@@ -146,27 +146,27 @@
         "size_in_bytes": 22
       },
       {
-        "_path": "Lib/site-packages/asttokens/__pycache__/__init__.cpython-311.pyc",
+        "_path": "Lib/site-packages/asttokens/__pycache__/__init__.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/asttokens/__pycache__/asttokens.cpython-311.pyc",
+        "_path": "Lib/site-packages/asttokens/__pycache__/asttokens.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/asttokens/__pycache__/line_numbers.cpython-311.pyc",
+        "_path": "Lib/site-packages/asttokens/__pycache__/line_numbers.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/asttokens/__pycache__/mark_tokens.cpython-311.pyc",
+        "_path": "Lib/site-packages/asttokens/__pycache__/mark_tokens.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/asttokens/__pycache__/util.cpython-311.pyc",
+        "_path": "Lib/site-packages/asttokens/__pycache__/util.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/asttokens/__pycache__/version.cpython-311.pyc",
+        "_path": "Lib/site-packages/asttokens/__pycache__/version.cpython-39.pyc",
         "path_type": "pyc_file"
       }
     ],

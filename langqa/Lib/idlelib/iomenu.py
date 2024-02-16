@@ -9,12 +9,18 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.simpledialog import askstring
 
+import idlelib
 from idlelib.config import idleConf
 from idlelib.util import py_extensions
 
 py_extensions = ' '.join("*"+ext for ext in py_extensions)
+
 encoding = 'utf-8'
-errors = 'surrogatepass' if sys.platform == 'win32' else 'surrogateescape'
+if sys.platform == 'win32':
+    errors = 'surrogatepass'
+else:
+    errors = 'surrogateescape'
+
 
 
 class IOBinding:
@@ -251,17 +257,11 @@ class IOBinding:
             return False
 
     def fixnewlines(self):
-        """Return text with os eols.
-
-        Add prompts if shell else final \n if missing.
-        """
-
-        if hasattr(self.editwin, "interp"):  # Saving shell.
-            text = self.editwin.get_prompt_text('1.0', self.text.index('end-1c'))
-        else:
-            if self.text.get("end-2c") != '\n':
-                self.text.insert("end-1c", "\n")  # Changes 'end-1c' value.
-            text = self.text.get('1.0', "end-1c")
+        "Return text with final \n if needed and os eols."
+        if (self.text.get("end-2c") != '\n'
+            and not hasattr(self.editwin, "interp")):  # Not shell.
+            self.text.insert("end-1c", "\n")
+        text = self.text.get("1.0", "end-1c")
         if self.eol_convention != "\n":
             text = text.replace("\n", self.eol_convention)
         return text
@@ -393,15 +393,13 @@ class IOBinding:
         if self.editwin.flist:
             self.editwin.update_recent_files_list(filename)
 
-
 def _io_binding(parent):  # htest #
     from tkinter import Toplevel, Text
 
-    top = Toplevel(parent)
-    top.title("Test IOBinding")
+    root = Toplevel(parent)
+    root.title("Test IOBinding")
     x, y = map(int, parent.geometry().split('+')[1:])
-    top.geometry("+%d+%d" % (x, y + 175))
-
+    root.geometry("+%d+%d" % (x, y + 175))
     class MyEditWin:
         def __init__(self, text):
             self.text = text
@@ -425,12 +423,11 @@ def _io_binding(parent):  # htest #
         def savecopy(self, event):
             self.text.event_generate("<<save-copy-of-window-as-file>>")
 
-    text = Text(top)
+    text = Text(root)
     text.pack()
     text.focus_set()
     editwin = MyEditWin(text)
     IOBinding(editwin)
-
 
 if __name__ == "__main__":
     from unittest import main

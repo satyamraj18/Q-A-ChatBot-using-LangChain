@@ -11,7 +11,7 @@ from unittest.mock import (
     call, DEFAULT, patch, sentinel,
     MagicMock, Mock, NonCallableMock,
     NonCallableMagicMock, AsyncMock, _Call, _CallList,
-    create_autospec, InvalidSpecError
+    create_autospec
 )
 
 
@@ -36,12 +36,6 @@ class Something(object):
 
     @staticmethod
     def smeth(a, b, c, d=None): pass
-
-
-class Typos():
-    autospect = None
-    auto_spec = None
-    set_spec = None
 
 
 def something(a): pass
@@ -203,36 +197,6 @@ class MockTest(unittest.TestCase):
         mock = create_autospec(f)
         mock.side_effect = ValueError('Bazinga!')
         self.assertRaisesRegex(ValueError, 'Bazinga!', mock)
-
-
-    def test_autospec_mock(self):
-        class A(object):
-            class B(object):
-                C = None
-
-        with mock.patch.object(A, 'B'):
-            with self.assertRaisesRegex(InvalidSpecError,
-                                        "Cannot autospec attr 'B' from target <MagicMock spec='A'"):
-                create_autospec(A).B
-            with self.assertRaisesRegex(InvalidSpecError,
-                                        "Cannot autospec attr 'B' from target 'A'"):
-                mock.patch.object(A, 'B', autospec=True).start()
-            with self.assertRaisesRegex(InvalidSpecError,
-                                        "Cannot autospec attr 'C' as the patch target "):
-                mock.patch.object(A.B, 'C', autospec=True).start()
-            with self.assertRaisesRegex(InvalidSpecError,
-                                        "Cannot spec attr 'B' as the spec "):
-                mock.patch.object(A, 'B', spec=A.B).start()
-            with self.assertRaisesRegex(InvalidSpecError,
-                                        "Cannot spec attr 'B' as the spec_set "):
-                mock.patch.object(A, 'B', spec_set=A.B).start()
-            with self.assertRaisesRegex(InvalidSpecError,
-                                        "Cannot spec attr 'B' as the spec_set "):
-                mock.patch.object(A, 'B', spec_set=A.B).start()
-            with self.assertRaisesRegex(InvalidSpecError, "Cannot spec a Mock object."):
-                mock.Mock(A.B)
-            with mock.patch('builtins.open', mock.mock_open()):
-                mock.mock_open()  # should still be valid with open() mocked
 
 
     def test_reset_mock(self):
@@ -1039,7 +1003,7 @@ class MockTest(unittest.TestCase):
 
         actual = 'not called.'
         expected = "mock(1, '2', 3, bar='foo')"
-        message = 'expected call not found.\nExpected: %s\n  Actual: %s'
+        message = 'expected call not found.\nExpected: %s\nActual: %s'
         self.assertRaisesWithMsg(
             AssertionError, message % (expected, actual),
             mock.assert_called_with, 1, '2', 3, bar='foo'
@@ -1054,7 +1018,7 @@ class MockTest(unittest.TestCase):
         for meth in asserters:
             actual = "foo(1, '2', 3, foo='foo')"
             expected = "foo(1, '2', 3, bar='foo')"
-            message = 'expected call not found.\nExpected: %s\n  Actual: %s'
+            message = 'expected call not found.\nExpected: %s\nActual: %s'
             self.assertRaisesWithMsg(
                 AssertionError, message % (expected, actual),
                 meth, 1, '2', 3, bar='foo'
@@ -1064,7 +1028,7 @@ class MockTest(unittest.TestCase):
         for meth in asserters:
             actual = "foo(1, '2', 3, foo='foo')"
             expected = "foo(bar='foo')"
-            message = 'expected call not found.\nExpected: %s\n  Actual: %s'
+            message = 'expected call not found.\nExpected: %s\nActual: %s'
             self.assertRaisesWithMsg(
                 AssertionError, message % (expected, actual),
                 meth, bar='foo'
@@ -1074,7 +1038,7 @@ class MockTest(unittest.TestCase):
         for meth in asserters:
             actual = "foo(1, '2', 3, foo='foo')"
             expected = "foo(1, 2, 3)"
-            message = 'expected call not found.\nExpected: %s\n  Actual: %s'
+            message = 'expected call not found.\nExpected: %s\nActual: %s'
             self.assertRaisesWithMsg(
                 AssertionError, message % (expected, actual),
                 meth, 1, 2, 3
@@ -1084,7 +1048,7 @@ class MockTest(unittest.TestCase):
         for meth in asserters:
             actual = "foo(1, '2', 3, foo='foo')"
             expected = "foo()"
-            message = 'expected call not found.\nExpected: %s\n  Actual: %s'
+            message = 'expected call not found.\nExpected: %s\nActual: %s'
             self.assertRaisesWithMsg(
                 AssertionError, message % (expected, actual), meth
             )
@@ -1533,7 +1497,7 @@ class MockTest(unittest.TestCase):
                 '^{}$'.format(
                     re.escape('Calls not found.\n'
                               'Expected: [call()]\n'
-                              '  Actual: [call(1)]'))) as cm:
+                              'Actual: [call(1)]'))) as cm:
             mock.assert_has_calls([call()])
         self.assertIsNone(cm.exception.__cause__)
 
@@ -1545,7 +1509,7 @@ class MockTest(unittest.TestCase):
                         'Error processing expected calls.\n'
                         "Errors: [None, TypeError('too many positional arguments')]\n"
                         "Expected: [call(), call(1, 2)]\n"
-                        '  Actual: [call(1)]'))) as cm:
+                        'Actual: [call(1)]'))) as cm:
             mock.assert_has_calls([call(), call(1, 2)])
         self.assertIsInstance(cm.exception.__cause__, TypeError)
 
@@ -1634,39 +1598,14 @@ class MockTest(unittest.TestCase):
     #Issue21238
     def test_mock_unsafe(self):
         m = Mock()
-        msg = "is not a valid assertion. Use a spec for the mock"
+        msg = "Attributes cannot start with 'assert' or 'assret'"
         with self.assertRaisesRegex(AttributeError, msg):
             m.assert_foo_call()
         with self.assertRaisesRegex(AttributeError, msg):
             m.assret_foo_call()
-        with self.assertRaisesRegex(AttributeError, msg):
-            m.asert_foo_call()
-        with self.assertRaisesRegex(AttributeError, msg):
-            m.aseert_foo_call()
-        with self.assertRaisesRegex(AttributeError, msg):
-            m.assrt_foo_call()
         m = Mock(unsafe=True)
         m.assert_foo_call()
         m.assret_foo_call()
-        m.asert_foo_call()
-        m.aseert_foo_call()
-        m.assrt_foo_call()
-
-    # gh-100739
-    def test_mock_safe_with_spec(self):
-        class Foo(object):
-            def assert_bar(self):
-                pass
-
-            def assertSome(self):
-                pass
-
-        m = Mock(spec=Foo)
-        m.assert_bar()
-        m.assertSome()
-
-        m.assert_bar.assert_called_once()
-        m.assertSome.assert_called_once()
 
     #Issue21262
     def test_assert_not_called(self):
@@ -2223,55 +2162,9 @@ class MockTest(unittest.TestCase):
                 self.obj_with_bool_func = unittest.mock.MagicMock()
 
         obj = Something()
-        with unittest.mock.patch.object(obj, 'obj_with_bool_func', spec=object): pass
+        with unittest.mock.patch.object(obj, 'obj_with_bool_func', autospec=True): pass
 
         self.assertEqual(obj.obj_with_bool_func.__bool__.call_count, 0)
-
-    def test_misspelled_arguments(self):
-        class Foo():
-            one = 'one'
-        # patch, patch.object and create_autospec need to check for misspelled
-        # arguments explicitly and throw a RuntimError if found.
-        with self.assertRaises(RuntimeError):
-            with patch(f'{__name__}.Something.meth', autospect=True): pass
-        with self.assertRaises(RuntimeError):
-            with patch.object(Foo, 'one', autospect=True): pass
-        with self.assertRaises(RuntimeError):
-            with patch(f'{__name__}.Something.meth', auto_spec=True): pass
-        with self.assertRaises(RuntimeError):
-            with patch.object(Foo, 'one', auto_spec=True): pass
-        with self.assertRaises(RuntimeError):
-            with patch(f'{__name__}.Something.meth', set_spec=True): pass
-        with self.assertRaises(RuntimeError):
-            with patch.object(Foo, 'one', set_spec=True): pass
-        with self.assertRaises(RuntimeError):
-            m = create_autospec(Foo, set_spec=True)
-        # patch.multiple, on the other hand, should flag misspelled arguments
-        # through an AttributeError, when trying to find the keys from kwargs
-        # as attributes on the target.
-        with self.assertRaises(AttributeError):
-            with patch.multiple(
-                f'{__name__}.Something', meth=DEFAULT, autospect=True): pass
-        with self.assertRaises(AttributeError):
-            with patch.multiple(
-                f'{__name__}.Something', meth=DEFAULT, auto_spec=True): pass
-        with self.assertRaises(AttributeError):
-            with patch.multiple(
-                f'{__name__}.Something', meth=DEFAULT, set_spec=True): pass
-
-        with patch(f'{__name__}.Something.meth', unsafe=True, autospect=True):
-            pass
-        with patch.object(Foo, 'one', unsafe=True, autospect=True): pass
-        with patch(f'{__name__}.Something.meth', unsafe=True, auto_spec=True):
-            pass
-        with patch.object(Foo, 'one', unsafe=True, auto_spec=True): pass
-        with patch(f'{__name__}.Something.meth', unsafe=True, set_spec=True):
-            pass
-        with patch.object(Foo, 'one', unsafe=True, set_spec=True): pass
-        m = create_autospec(Foo, set_spec=True, unsafe=True)
-        with patch.multiple(
-            f'{__name__}.Typos', autospect=True, set_spec=True, auto_spec=True):
-            pass
 
 
 if __name__ == '__main__':

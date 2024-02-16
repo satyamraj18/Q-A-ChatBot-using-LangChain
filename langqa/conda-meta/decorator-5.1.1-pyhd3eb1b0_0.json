@@ -20,7 +20,7 @@
     "Lib/site-packages/decorator-5.1.1.dist-info/top_level.txt",
     "Lib/site-packages/decorator.py",
     ".nonadmin",
-    "Lib/site-packages/__pycache__/decorator.cpython-311.pyc"
+    "Lib/site-packages/__pycache__/decorator.cpython-39.pyc"
   ],
   "fn": "decorator-5.1.1-pyhd3eb1b0_0.conda",
   "legacy_bz2_md5": "6072a09eeab81c07c98065234e46af1e",
@@ -108,7 +108,7 @@
         "size_in_bytes": 16752
       },
       {
-        "_path": "Lib/site-packages/__pycache__/decorator.cpython-311.pyc",
+        "_path": "Lib/site-packages/__pycache__/decorator.cpython-39.pyc",
         "path_type": "pyc_file"
       }
     ],

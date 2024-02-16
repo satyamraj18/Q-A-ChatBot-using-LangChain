@@ -26,15 +26,14 @@ import time
 import marshal
 import re
 
-from enum import StrEnum, _simple_enum
+from enum import Enum
 from functools import cmp_to_key
 from dataclasses import dataclass
 from typing import Dict
 
 __all__ = ["Stats", "SortKey", "FunctionProfile", "StatsProfile"]
 
-@_simple_enum(StrEnum)
-class SortKey:
+class SortKey(str, Enum):
     CALLS = 'calls', 'ncalls'
     CUMULATIVE = 'cumulative', 'cumtime'
     FILENAME = 'filename', 'module'
@@ -57,7 +56,7 @@ class SortKey:
 
 @dataclass(unsafe_hash=True)
 class FunctionProfile:
-    ncalls: str
+    ncalls: int
     tottime: float
     percall_tottime: float
     cumtime: float
@@ -522,7 +521,7 @@ class Stats:
 class TupleComp:
     """This class provides a generic function for comparing any two tuples.
     Each instance records a list of tuple-indices (from most significant
-    to least significant), and sort direction (ascending or descending) for
+    to least significant), and sort direction (ascending or decending) for
     each tuple-index.  The compare functions can then be used as the function
     argument to the system sort() function when a list of tuples need to be
     sorted in the instances order."""

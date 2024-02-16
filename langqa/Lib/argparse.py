@@ -89,8 +89,6 @@ import os as _os
 import re as _re
 import sys as _sys
 
-import warnings
-
 from gettext import gettext as _, ngettext
 
 SUPPRESS = '==SUPPRESS=='
@@ -152,7 +150,6 @@ def _copy_items(items):
 # ===============
 # Formatting Help
 # ===============
-
 
 class HelpFormatter(object):
     """Formatter for generating usage messages and argument help strings.
@@ -403,18 +400,10 @@ class HelpFormatter(object):
             except ValueError:
                 continue
             else:
-                group_action_count = len(group._group_actions)
-                end = start + group_action_count
+                end = start + len(group._group_actions)
                 if actions[start:end] == group._group_actions:
-
-                    suppressed_actions_count = 0
                     for action in group._group_actions:
                         group_actions.add(action)
-                        if action.help is SUPPRESS:
-                            suppressed_actions_count += 1
-
-                    exposed_actions_count = group_action_count - suppressed_actions_count
-
                     if not group.required:
                         if start in inserts:
                             inserts[start] += ' ['
@@ -424,7 +413,7 @@ class HelpFormatter(object):
                             inserts[end] += ']'
                         else:
                             inserts[end] = ']'
-                    elif exposed_actions_count > 1:
+                    else:
                         if start in inserts:
                             inserts[start] += ' ('
                         else:
@@ -498,6 +487,7 @@ class HelpFormatter(object):
         text = _re.sub(r'(%s) ' % open, r'\1', text)
         text = _re.sub(r' (%s)' % close, r'\1', text)
         text = _re.sub(r'%s *%s' % (open, close), r'', text)
+        text = _re.sub(r'\(([^|]*)\)', r'\1', text)
         text = text.strip()
 
         # return the text
@@ -703,25 +693,13 @@ class ArgumentDefaultsHelpFormatter(HelpFormatter):
     """
 
     def _get_help_string(self, action):
-        """
-        Add the default value to the option help message.
-
-        ArgumentDefaultsHelpFormatter and BooleanOptionalAction when it isn't
-        already present. This code will do that, detecting cornercases to
-        prevent duplicates or cases where it wouldn't make sense to the end
-        user.
-        """
         help = action.help
-        if help is None:
-            help = ''
-
-        if '%(default)' not in help:
+        if '%(default)' not in action.help:
             if action.default is not SUPPRESS:
                 defaulting_nargs = [OPTIONAL, ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
                     help += ' (default: %(default)s)'
         return help
-
 
 
 class MetavarTypeHelpFormatter(HelpFormatter):
@@ -737,6 +715,7 @@ class MetavarTypeHelpFormatter(HelpFormatter):
 
     def _get_default_metavar_for_positional(self, action):
         return action.type.__name__
+
 
 
 # =====================
@@ -773,7 +752,7 @@ class ArgumentError(Exception):
         if self.argument_name is None:
             format = '%(message)s'
         else:
-            format = _('argument %(argument_name)s: %(message)s')
+            format = 'argument %(argument_name)s: %(message)s'
         return format % dict(message=self.message,
                              argument_name=self.argument_name)
 
@@ -881,7 +860,6 @@ class Action(_AttributeHolder):
     def __call__(self, parser, namespace, values, option_string=None):
         raise NotImplementedError(_('.__call__() not defined'))
 
-
 class BooleanOptionalAction(Action):
     def __init__(self,
                  option_strings,
@@ -901,6 +879,9 @@ class BooleanOptionalAction(Action):
                 option_string = '--no-' + option_string[2:]
                 _option_strings.append(option_string)
 
+        if help is not None and default is not None and default is not SUPPRESS:
+            help += " (default: %(default)s)"
+
         super().__init__(
             option_strings=_option_strings,
             dest=dest,
@@ -911,7 +892,6 @@ class BooleanOptionalAction(Action):
             required=required,
             help=help,
             metavar=metavar)
-
 
     def __call__(self, parser, namespace, values, option_string=None):
         if option_string in self.option_strings:
@@ -961,7 +941,7 @@ class _StoreConstAction(Action):
     def __init__(self,
                  option_strings,
                  dest,
-                 const=None,
+                 const,
                  default=None,
                  required=False,
                  help=None,
@@ -1056,7 +1036,7 @@ class _AppendConstAction(Action):
     def __init__(self,
                  option_strings,
                  dest,
-                 const=None,
+                 const,
                  default=None,
                  required=False,
                  help=None,
@@ -1187,13 +1167,6 @@ class _SubParsersAction(Action):
             kwargs['prog'] = '%s %s' % (self._prog_prefix, name)
 
         aliases = kwargs.pop('aliases', ())
-
-        if name in self._name_parser_map:
-            raise ArgumentError(self, _('conflicting subparser: %s') % name)
-        for alias in aliases:
-            if alias in self._name_parser_map:
-                raise ArgumentError(
-                    self, _('conflicting subparser alias: %s') % alias)
 
         # create a pseudo-action to hold the choice help
         if 'help' in kwargs:
@@ -1675,14 +1648,6 @@ class _ArgumentGroup(_ActionsContainer):
         super(_ArgumentGroup, self)._remove_action(action)
         self._group_actions.remove(action)
 
-    def add_argument_group(self, *args, **kwargs):
-        warnings.warn(
-            "Nesting argument groups is deprecated.",
-            category=DeprecationWarning,
-            stacklevel=2
-        )
-        return super().add_argument_group(*args, **kwargs)
-
 
 class _MutuallyExclusiveGroup(_ArgumentGroup):
 
@@ -1703,21 +1668,12 @@ class _MutuallyExclusiveGroup(_ArgumentGroup):
         self._container._remove_action(action)
         self._group_actions.remove(action)
 
-    def add_mutually_exclusive_group(self, *args, **kwargs):
-        warnings.warn(
-            "Nesting mutually exclusive groups is deprecated.",
-            category=DeprecationWarning,
-            stacklevel=2
-        )
-        return super().add_mutually_exclusive_group(*args, **kwargs)
-
 
 class ArgumentParser(_AttributeHolder, _ActionsContainer):
     """Object for parsing command line strings into Python objects.
 
     Keyword Arguments:
-        - prog -- The name of the program (default:
-            ``os.path.basename(sys.argv[0])``)
+        - prog -- The name of the program (default: sys.argv[0])
         - usage -- A usage message (default: auto-generated from arguments)
         - description -- A description of what the program does
         - epilog -- Text following the argument descriptions
@@ -1770,7 +1726,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
 
         add_group = self.add_argument_group
         self._positionals = add_group(_('positional arguments'))
-        self._optionals = add_group(_('options'))
+        self._optionals = add_group(_('optional arguments'))
         self._subparsers = None
 
         # register types
@@ -1900,7 +1856,8 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         if self.exit_on_error:
             try:
                 namespace, args = self._parse_known_args(args, namespace)
-            except ArgumentError as err:
+            except ArgumentError:
+                err = _sys.exc_info()[1]
                 self.error(str(err))
         else:
             namespace, args = self._parse_known_args(args, namespace)
@@ -2004,11 +1961,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                     # arguments, try to parse more single-dash options out
                     # of the tail of the option string
                     chars = self.prefix_chars
-                    if (
-                        arg_count == 0
-                        and option_string[1] not in chars
-                        and explicit_arg != ''
-                    ):
+                    if arg_count == 0 and option_string[1] not in chars:
                         action_tuples.append((action, [], option_string))
                         char = option_string[0]
                         option_string = char + explicit_arg[0]
@@ -2179,7 +2132,8 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                                 arg_strings.append(arg)
                         arg_strings = self._read_args_from_files(arg_strings)
                         new_arg_strings.extend(arg_strings)
-                except OSError as err:
+                except OSError:
+                    err = _sys.exc_info()[1]
                     self.error(str(err))
 
         # return the modified argument list
@@ -2529,9 +2483,9 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
             result = type_func(arg_string)
 
         # ArgumentTypeErrors indicate errors
-        except ArgumentTypeError as err:
+        except ArgumentTypeError:
             name = getattr(action.type, '__name__', repr(action.type))
-            msg = str(err)
+            msg = str(_sys.exc_info()[1])
             raise ArgumentError(action, msg)
 
         # TypeErrors or ValueErrors also indicate errors
@@ -2602,11 +2556,9 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
 
     def _print_message(self, message, file=None):
         if message:
-            file = file or _sys.stderr
-            try:
-                file.write(message)
-            except (AttributeError, OSError):
-                pass
+            if file is None:
+                file = _sys.stderr
+            file.write(message)
 
     # ===============
     # Exiting methods

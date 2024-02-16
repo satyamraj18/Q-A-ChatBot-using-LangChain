@@ -75,7 +75,6 @@ import http
 import io
 import re
 import socket
-import sys
 import collections.abc
 from urllib.parse import urlsplit
 
@@ -106,6 +105,9 @@ globals().update(http.HTTPStatus.__members__)
 # another hack to maintain backwards compatibility
 # Mapping status codes to official W3C names
 responses = {v: v.phrase for v in http.HTTPStatus.__members__.values()}
+
+# maximal amount of data to read at one time in _safe_read
+MAXAMOUNT = 1048576
 
 # maximal line length when calling readline().
 _MAXLINE = 65536
@@ -172,13 +174,6 @@ def _encode(data, name='data'):
             "if you want to send it encoded in UTF-8." %
             (name.title(), data[err.start:err.end], name)) from None
 
-def _strip_ipv6_iface(enc_name: bytes) -> bytes:
-    """Remove interface scope from IPv6 address."""
-    enc_name, percent, _ = enc_name.partition(b"%")
-    if percent:
-        assert enc_name.startswith(b'['), enc_name
-        enc_name += b']'
-    return enc_name
 
 class HTTPMessage(email.message.Message):
     # XXX The only usage of this method is in
@@ -455,7 +450,6 @@ class HTTPResponse(io.BufferedIOBase):
         return self.fp is None
 
     def read(self, amt=None):
-        """Read and return the response body, or up to the next amt bytes."""
         if self.fp is None:
             return b""
 
@@ -463,25 +457,18 @@ class HTTPResponse(io.BufferedIOBase):
             self._close_conn()
             return b""
 
-        if self.chunked:
-            return self._read_chunked(amt)
-
         if amt is not None:
-            if self.length is not None and amt > self.length:
-                # clip the read to the "end of response"
-                amt = self.length
-            s = self.fp.read(amt)
-            if not s and amt:
-                # Ideally, we would raise IncompleteRead if the content-length
-                # wasn't satisfied, but it might break compatibility.
-                self._close_conn()
-            elif self.length is not None:
-                self.length -= len(s)
-                if not self.length:
-                    self._close_conn()
-            return s
+            # Amount is given, implement using readinto
+            b = bytearray(amt)
+            n = self.readinto(b)
+            return memoryview(b)[:n].tobytes()
         else:
             # Amount is not given (unbounded read) so we must check self.length
+            # and self.chunked
+
+            if self.chunked:
+                return self._readall_chunked()
+
             if self.length is None:
                 s = self.fp.read()
             else:
@@ -582,7 +569,7 @@ class HTTPResponse(io.BufferedIOBase):
             self.chunk_left = chunk_left
         return chunk_left
 
-    def _read_chunked(self, amt=None):
+    def _readall_chunked(self):
         assert self.chunked != _UNKNOWN
         value = []
         try:
@@ -590,19 +577,11 @@ class HTTPResponse(io.BufferedIOBase):
                 chunk_left = self._get_chunk_left()
                 if chunk_left is None:
                     break
-
-                if amt is not None and amt <= chunk_left:
-                    value.append(self._safe_read(amt))
-                    self.chunk_left = chunk_left - amt
-                    break
-
                 value.append(self._safe_read(chunk_left))
-                if amt is not None:
-                    amt -= chunk_left
                 self.chunk_left = 0
             return b''.join(value)
-        except IncompleteRead as exc:
-            raise IncompleteRead(b''.join(value)) from exc
+        except IncompleteRead:
+            raise IncompleteRead(b''.join(value))
 
     def _readinto_chunked(self, b):
         assert self.chunked != _UNKNOWN
@@ -629,24 +608,43 @@ class HTTPResponse(io.BufferedIOBase):
             raise IncompleteRead(bytes(b[0:total_bytes]))
 
     def _safe_read(self, amt):
-        """Read the number of bytes requested.
+        """Read the number of bytes requested, compensating for partial reads.
+
+        Normally, we have a blocking socket, but a read() can be interrupted
+        by a signal (resulting in a partial read).
+
+        Note that we cannot distinguish between EOF and an interrupt when zero
+        bytes have been read. IncompleteRead() will be raised in this
+        situation.
 
         This function should be used when <amt> bytes "should" be present for
         reading. If the bytes are truly not available (due to EOF), then the
         IncompleteRead exception can be used to detect the problem.
         """
-        data = self.fp.read(amt)
-        if len(data) < amt:
-            raise IncompleteRead(data, amt-len(data))
-        return data
+        s = []
+        while amt > 0:
+            chunk = self.fp.read(min(amt, MAXAMOUNT))
+            if not chunk:
+                raise IncompleteRead(b''.join(s), amt)
+            s.append(chunk)
+            amt -= len(chunk)
+        return b"".join(s)
 
     def _safe_readinto(self, b):
         """Same as _safe_read, but for reading into a buffer."""
-        amt = len(b)
-        n = self.fp.readinto(b)
-        if n < amt:
-            raise IncompleteRead(bytes(b[:n]), amt-n)
-        return n
+        total_bytes = 0
+        mvb = memoryview(b)
+        while total_bytes < len(b):
+            if MAXAMOUNT < len(mvb):
+                temp_mvb = mvb[0:MAXAMOUNT]
+                n = self.fp.readinto(temp_mvb)
+            else:
+                n = self.fp.readinto(mvb)
+            if not n:
+                raise IncompleteRead(bytes(mvb[0:total_bytes]), len(b))
+            mvb = mvb[n:]
+            total_bytes += n
+        return total_bytes
 
     def read1(self, n=-1):
         """Read with at most one underlying system call.  If at least one
@@ -925,35 +923,31 @@ class HTTPConnection:
         del headers
 
         response = self.response_class(self.sock, method=self._method)
-        try:
-            (version, code, message) = response._read_status()
+        (version, code, message) = response._read_status()
 
-            if code != http.HTTPStatus.OK:
-                self.close()
-                raise OSError(f"Tunnel connection failed: {code} {message.strip()}")
-            while True:
-                line = response.fp.readline(_MAXLINE + 1)
-                if len(line) > _MAXLINE:
-                    raise LineTooLong("header line")
-                if not line:
-                    # for sites which EOF without sending a trailer
-                    break
-                if line in (b'\r\n', b'\n', b''):
-                    break
+        if code != http.HTTPStatus.OK:
+            self.close()
+            raise OSError(f"Tunnel connection failed: {code} {message.strip()}")
+        while True:
+            line = response.fp.readline(_MAXLINE + 1)
+            if len(line) > _MAXLINE:
+                raise LineTooLong("header line")
+            if not line:
+                # for sites which EOF without sending a trailer
+                break
+            if line in (b'\r\n', b'\n', b''):
+                break
 
-                if self.debuglevel > 0:
-                    print('header:', line.decode())
-        finally:
-            response.close()
+            if self.debuglevel > 0:
+                print('header:', line.decode())
 
     def connect(self):
         """Connect to the host and port specified in __init__."""
-        sys.audit("http.client.connect", self, self.host, self.port)
         self.sock = self._create_connection(
             (self.host,self.port), self.timeout, self.source_address)
         # Might fail in OSs that don't implement TCP_NODELAY
         try:
-            self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+             self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         except OSError as e:
             if e.errno != errno.ENOPROTOOPT:
                 raise
@@ -991,7 +985,7 @@ class HTTPConnection:
             print("send:", repr(data))
         if hasattr(data, "read") :
             if self.debuglevel > 0:
-                print("sending a readable")
+                print("sendIng a read()able")
             encode = self._is_textIO(data)
             if encode and self.debuglevel > 0:
                 print("encoding file using iso-8859-1")
@@ -1001,10 +995,8 @@ class HTTPConnection:
                     break
                 if encode:
                     datablock = datablock.encode("iso-8859-1")
-                sys.audit("http.client.send", self, datablock)
                 self.sock.sendall(datablock)
             return
-        sys.audit("http.client.send", self, data)
         try:
             self.sock.sendall(data)
         except TypeError:
@@ -1024,7 +1016,7 @@ class HTTPConnection:
 
     def _read_readable(self, readable):
         if self.debuglevel > 0:
-            print("reading a readable")
+            print("sendIng a read()able")
         encode = self._is_textIO(readable)
         if encode and self.debuglevel > 0:
             print("encoding file using iso-8859-1")
@@ -1168,7 +1160,7 @@ class HTTPConnection:
                         netloc_enc = netloc.encode("ascii")
                     except UnicodeEncodeError:
                         netloc_enc = netloc.encode("idna")
-                    self.putheader('Host', _strip_ipv6_iface(netloc_enc))
+                    self.putheader('Host', netloc_enc)
                 else:
                     if self._tunnel_host:
                         host = self._tunnel_host
@@ -1185,9 +1177,8 @@ class HTTPConnection:
                     # As per RFC 273, IPv6 address should be wrapped with []
                     # when used as Host header
 
-                    if ":" in host:
+                    if host.find(':') >= 0:
                         host_enc = b'[' + host_enc + b']'
-                        host_enc = _strip_ipv6_iface(host_enc)
 
                     if port == self.default_port:
                         self.putheader('Host', host_enc)
@@ -1431,9 +1422,6 @@ else:
             self.cert_file = cert_file
             if context is None:
                 context = ssl._create_default_https_context()
-                # send ALPN extension to indicate HTTP/1.1 protocol
-                if self._http_vsn == 11:
-                    context.set_alpn_protocols(['http/1.1'])
                 # enable PHA for TLS 1.3 connections if available
                 if context.post_handshake_auth is not None:
                     context.post_handshake_auth = True

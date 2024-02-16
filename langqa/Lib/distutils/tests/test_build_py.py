@@ -9,7 +9,7 @@ from distutils.core import Distribution
 from distutils.errors import DistutilsFileError
 
 from distutils.tests import support
-from test.support import requires_subprocess
+from test.support import run_unittest
 
 
 class BuildPyTestCase(support.TempdirManager,
@@ -89,7 +89,6 @@ class BuildPyTestCase(support.TempdirManager,
             self.fail("failed package_data test when package_dir is ''")
 
     @unittest.skipIf(sys.dont_write_bytecode, 'byte-compile disabled')
-    @requires_subprocess()
     def test_byte_compile(self):
         project_dir, dist = self.create_dist(py_modules=['boiledeggs'])
         os.chdir(project_dir)
@@ -107,7 +106,6 @@ class BuildPyTestCase(support.TempdirManager,
                          ['boiledeggs.%s.pyc' % sys.implementation.cache_tag])
 
     @unittest.skipIf(sys.dont_write_bytecode, 'byte-compile disabled')
-    @requires_subprocess()
     def test_byte_compile_optimized(self):
         project_dir, dist = self.create_dist(py_modules=['boiledeggs'])
         os.chdir(project_dir)
@@ -174,5 +172,8 @@ class BuildPyTestCase(support.TempdirManager,
                       self.logs[0][1] % self.logs[0][2])
 
 
+def test_suite():
+    return unittest.makeSuite(BuildPyTestCase)
+
 if __name__ == "__main__":
-    unittest.main()
+    run_unittest(test_suite())

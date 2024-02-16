@@ -26,11 +26,11 @@
     "Lib/site-packages/stack_data/utils.py",
     "Lib/site-packages/stack_data/version.py",
     ".nonadmin",
-    "Lib/site-packages/stack_data/__pycache__/__init__.cpython-311.pyc",
-    "Lib/site-packages/stack_data/__pycache__/core.cpython-311.pyc",
-    "Lib/site-packages/stack_data/__pycache__/formatting.cpython-311.pyc",
-    "Lib/site-packages/stack_data/__pycache__/utils.cpython-311.pyc",
-    "Lib/site-packages/stack_data/__pycache__/version.cpython-311.pyc"
+    "Lib/site-packages/stack_data/__pycache__/__init__.cpython-39.pyc",
+    "Lib/site-packages/stack_data/__pycache__/core.cpython-39.pyc",
+    "Lib/site-packages/stack_data/__pycache__/formatting.cpython-39.pyc",
+    "Lib/site-packages/stack_data/__pycache__/utils.cpython-39.pyc",
+    "Lib/site-packages/stack_data/__pycache__/version.cpython-39.pyc"
   ],
   "fn": "stack_data-0.2.0-pyhd3eb1b0_0.conda",
   "legacy_bz2_md5": "fa3edcfd4c2c0d744bc177cbfcd77626",
@@ -139,23 +139,23 @@
         "size_in_bytes": 22
       },
       {
-        "_path": "Lib/site-packages/stack_data/__pycache__/__init__.cpython-311.pyc",
+        "_path": "Lib/site-packages/stack_data/__pycache__/__init__.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/stack_data/__pycache__/core.cpython-311.pyc",
+        "_path": "Lib/site-packages/stack_data/__pycache__/core.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/stack_data/__pycache__/formatting.cpython-311.pyc",
+        "_path": "Lib/site-packages/stack_data/__pycache__/formatting.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/stack_data/__pycache__/utils.cpython-311.pyc",
+        "_path": "Lib/site-packages/stack_data/__pycache__/utils.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/stack_data/__pycache__/version.cpython-311.pyc",
+        "_path": "Lib/site-packages/stack_data/__pycache__/version.cpython-39.pyc",
         "path_type": "pyc_file"
       }
     ],

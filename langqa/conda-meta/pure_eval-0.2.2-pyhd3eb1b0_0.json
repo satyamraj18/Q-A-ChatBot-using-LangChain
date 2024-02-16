@@ -24,11 +24,11 @@
     "Lib/site-packages/pure_eval/utils.py",
     "Lib/site-packages/pure_eval/version.py",
     ".nonadmin",
-    "Lib/site-packages/pure_eval/__pycache__/__init__.cpython-311.pyc",
-    "Lib/site-packages/pure_eval/__pycache__/core.cpython-311.pyc",
-    "Lib/site-packages/pure_eval/__pycache__/my_getattr_static.cpython-311.pyc",
-    "Lib/site-packages/pure_eval/__pycache__/utils.cpython-311.pyc",
-    "Lib/site-packages/pure_eval/__pycache__/version.cpython-311.pyc"
+    "Lib/site-packages/pure_eval/__pycache__/__init__.cpython-39.pyc",
+    "Lib/site-packages/pure_eval/__pycache__/core.cpython-39.pyc",
+    "Lib/site-packages/pure_eval/__pycache__/my_getattr_static.cpython-39.pyc",
+    "Lib/site-packages/pure_eval/__pycache__/utils.cpython-39.pyc",
+    "Lib/site-packages/pure_eval/__pycache__/version.cpython-39.pyc"
   ],
   "fn": "pure_eval-0.2.2-pyhd3eb1b0_0.conda",
   "legacy_bz2_md5": "8be7529b5e573e3cbc6df277b9950109",
@@ -144,23 +144,23 @@
         "size_in_bytes": 21
       },
       {
-        "_path": "Lib/site-packages/pure_eval/__pycache__/__init__.cpython-311.pyc",
+        "_path": "Lib/site-packages/pure_eval/__pycache__/__init__.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/pure_eval/__pycache__/core.cpython-311.pyc",
+        "_path": "Lib/site-packages/pure_eval/__pycache__/core.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/pure_eval/__pycache__/my_getattr_static.cpython-311.pyc",
+        "_path": "Lib/site-packages/pure_eval/__pycache__/my_getattr_static.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/pure_eval/__pycache__/utils.cpython-311.pyc",
+        "_path": "Lib/site-packages/pure_eval/__pycache__/utils.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/pure_eval/__pycache__/version.cpython-311.pyc",
+        "_path": "Lib/site-packages/pure_eval/__pycache__/version.cpython-39.pyc",
         "path_type": "pyc_file"
       }
     ],

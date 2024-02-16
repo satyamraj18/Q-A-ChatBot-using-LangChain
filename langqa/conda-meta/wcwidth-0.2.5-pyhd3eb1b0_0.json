@@ -24,11 +24,11 @@
     "Lib/site-packages/wcwidth/unicode_versions.py",
     "Lib/site-packages/wcwidth/wcwidth.py",
     ".nonadmin",
-    "Lib/site-packages/wcwidth/__pycache__/__init__.cpython-311.pyc",
-    "Lib/site-packages/wcwidth/__pycache__/table_wide.cpython-311.pyc",
-    "Lib/site-packages/wcwidth/__pycache__/table_zero.cpython-311.pyc",
-    "Lib/site-packages/wcwidth/__pycache__/unicode_versions.cpython-311.pyc",
-    "Lib/site-packages/wcwidth/__pycache__/wcwidth.cpython-311.pyc"
+    "Lib/site-packages/wcwidth/__pycache__/__init__.cpython-39.pyc",
+    "Lib/site-packages/wcwidth/__pycache__/table_wide.cpython-39.pyc",
+    "Lib/site-packages/wcwidth/__pycache__/table_zero.cpython-39.pyc",
+    "Lib/site-packages/wcwidth/__pycache__/unicode_versions.cpython-39.pyc",
+    "Lib/site-packages/wcwidth/__pycache__/wcwidth.cpython-39.pyc"
   ],
   "fn": "wcwidth-0.2.5-pyhd3eb1b0_0.conda",
   "legacy_bz2_md5": "98982290b7b7eff532ec6dead415172b",
@@ -143,23 +143,23 @@
         "size_in_bytes": 14872
       },
       {
-        "_path": "Lib/site-packages/wcwidth/__pycache__/__init__.cpython-311.pyc",
+        "_path": "Lib/site-packages/wcwidth/__pycache__/__init__.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/wcwidth/__pycache__/table_wide.cpython-311.pyc",
+        "_path": "Lib/site-packages/wcwidth/__pycache__/table_wide.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/wcwidth/__pycache__/table_zero.cpython-311.pyc",
+        "_path": "Lib/site-packages/wcwidth/__pycache__/table_zero.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/wcwidth/__pycache__/unicode_versions.cpython-311.pyc",
+        "_path": "Lib/site-packages/wcwidth/__pycache__/unicode_versions.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/wcwidth/__pycache__/wcwidth.cpython-311.pyc",
+        "_path": "Lib/site-packages/wcwidth/__pycache__/wcwidth.cpython-39.pyc",
         "path_type": "pyc_file"
       }
     ],

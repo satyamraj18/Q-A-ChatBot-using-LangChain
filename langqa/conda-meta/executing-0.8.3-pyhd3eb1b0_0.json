@@ -21,9 +21,9 @@
     "Lib/site-packages/executing/executing.py",
     "Lib/site-packages/executing/version.py",
     ".nonadmin",
-    "Lib/site-packages/executing/__pycache__/__init__.cpython-311.pyc",
-    "Lib/site-packages/executing/__pycache__/executing.cpython-311.pyc",
-    "Lib/site-packages/executing/__pycache__/version.cpython-311.pyc"
+    "Lib/site-packages/executing/__pycache__/__init__.cpython-39.pyc",
+    "Lib/site-packages/executing/__pycache__/executing.cpython-39.pyc",
+    "Lib/site-packages/executing/__pycache__/version.cpython-39.pyc"
   ],
   "fn": "executing-0.8.3-pyhd3eb1b0_0.conda",
   "legacy_bz2_md5": "1bdd5a02233d229e76081a73659e9405",
@@ -118,15 +118,15 @@
         "size_in_bytes": 21
       },
       {
-        "_path": "Lib/site-packages/executing/__pycache__/__init__.cpython-311.pyc",
+        "_path": "Lib/site-packages/executing/__pycache__/__init__.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/executing/__pycache__/executing.cpython-311.pyc",
+        "_path": "Lib/site-packages/executing/__pycache__/executing.cpython-39.pyc",
         "path_type": "pyc_file"
       },
       {
-        "_path": "Lib/site-packages/executing/__pycache__/version.cpython-311.pyc",
+        "_path": "Lib/site-packages/executing/__pycache__/version.cpython-39.pyc",
         "path_type": "pyc_file"
       }
     ],

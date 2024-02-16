@@ -13,9 +13,7 @@ from distutils.archive_util import (check_archive_formats, make_tarball,
                                     ARCHIVE_FORMATS)
 from distutils.spawn import find_executable, spawn
 from distutils.tests import support
-from test.support import patch
-from test.support.os_helper import change_cwd
-from test.support.warnings_helper import check_warnings
+from test.support import check_warnings, run_unittest, patch, change_cwd
 
 try:
     import grp
@@ -389,5 +387,8 @@ class ArchiveUtilTestCase(support.TempdirManager,
         finally:
             archive.close()
 
+def test_suite():
+    return unittest.makeSuite(ArchiveUtilTestCase)
+
 if __name__ == "__main__":
-    unittest.main()
+    run_unittest(test_suite())
